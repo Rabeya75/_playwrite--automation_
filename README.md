@@ -1,4 +1,4 @@
-# QuickyBD QA Project
+# QuickyBD Project
 
 This repository now includes a dedicated Java QA package for QuickyBD.
 
