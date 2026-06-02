@@ -1,0 +1,42 @@
+name: QuickyBD QA Java
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'quickybd-qa-java/**'
+      - '.github/workflows/quickybd-qa-java.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'quickybd-qa-java/**'
+      - '.github/workflows/quickybd-qa-java.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Install Playwright Chromium
+        working-directory: quickybd-qa-java/playwright
+        run: mvn -q exec:java -Dexec.classpathScope=test -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install chromium"
+
+      - name: Run Selenium and Playwright tests
+        working-directory: quickybd-qa-java
+        env:
+          QUICKYBD_FRONTEND_URL: https://quickybd.com/
+          QUICKYBD_BACKEND_URL: https://be.quickybd.com/admin/product/show
+          QUICKYBD_ADMIN_USERNAME: ${{ secrets.QUICKYBD_ADMIN_USERNAME }}
+          QUICKYBD_ADMIN_PASSWORD: ${{ secrets.QUICKYBD_ADMIN_PASSWORD }}
+        run: mvn -q test
